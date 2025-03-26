@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          path: main-repo
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: gh-pages-repo
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: |
+          cd main-repo
+          npm ci
+        
+      - name: Build static files
+        run: |
+          cd main-repo
+          mkdir -p dist
+          cp -r public/* dist/
+          
+      - name: Preserve data directory
+        run: |
+          # Check if data directory exists in gh-pages branch
+          if [ -d "gh-pages-repo/data" ]; then
+            echo "Preserving existing data directory"
+            mkdir -p main-repo/dist/data
+            cp -r gh-pages-repo/data/* main-repo/dist/data/
+          else
+            echo "Creating new data directory"
+            mkdir -p main-repo/dist/data
+            echo "{\"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\", \"status\": \"initialized\"}" > main-repo/dist/data/metadata.json
+          fi
+          
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: main-repo/dist
+          branch: gh-pages
+          clean: true
+          clean-exclude: |
+            data/*
