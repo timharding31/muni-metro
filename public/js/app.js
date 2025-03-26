@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
     // Get DOM elements
     const refreshBtn = document.getElementById('refresh-btn')
     const apiRefreshBtn = document.getElementById('api-refresh-btn')
