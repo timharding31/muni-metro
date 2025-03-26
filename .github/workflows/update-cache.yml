@@ -22,11 +22,11 @@ jobs:
         run: |
           mkdir -p data
           
-          # Fetch data for N-Judah stop (13985)
-          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=13985&format=json" > data/stop-13985.json
-          
-          # Fetch data for J-Church stop (14448)
+          # Fetch data for N-Judah stop (14448)
           curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14448&format=json" > data/stop-14448.json
+          
+          # Fetch data for J-Church stop (17073)
+          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=17073&format=json" > data/stop-17073.json
           
           # Create metadata file with timestamp
           echo "{\"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > data/metadata.json
