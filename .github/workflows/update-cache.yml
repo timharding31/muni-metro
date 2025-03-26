@@ -8,6 +8,8 @@ on:
 jobs:
   update-cache:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -23,10 +25,10 @@ jobs:
           mkdir -p data
           
           # Fetch data for N-Judah stop (14448)
-          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14448&format=json" > data/stop-14448.json
+          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14448&format=json" > data/stop-14448.json || echo "Failed to fetch N-Judah data"
           
           # Fetch data for J-Church stop (17073)
-          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=17073&format=json" > data/stop-17073.json
+          curl -s "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=17073&format=json" > data/stop-17073.json || echo "Failed to fetch J-Church data"
           
           # Create metadata file with timestamp
           echo "{\"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > data/metadata.json
@@ -37,4 +39,4 @@ jobs:
           git config --local user.name "GitHub Actions"
           git add data/
           git commit -m "Update Muni data cache" || echo "No changes to commit"
-          git push
+          git push || echo "Failed to push changes"
