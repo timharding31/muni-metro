@@ -95,16 +95,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Create a proxy URL to avoid CORS issues
-            const createProxyUrl = (stopCode) => {
-                const baseUrl = `https://api.511.org/transit/StopMonitoring?api_key=${apiKey}&agency=SF&stopCode=${stopCode}&format=json`;
-                // Use a CORS proxy to make the request
-                return `https://api.allorigins.win/get?url=${encodeURIComponent(baseUrl)}`;
+            const createFetchUrl = (stopCode) => {
+                return `https://api.511.org/transit/StopMonitoring?api_key=${apiKey}&agency=SF&stopCode=${stopCode}&format=json`;
             };
 
             // Fetch data for both stops concurrently
             const [stop1Response, stop2Response] = await Promise.all([
-                fetch(createProxyUrl(STOP_CODES.N_JUDAH)),
-                fetch(createProxyUrl(STOP_CODES.J_CHURCH))
+                fetch(createFetchUrl(STOP_CODES.N_JUDAH)),
+                fetch(createFetchUrl(STOP_CODES.J_CHURCH))
             ]);
             
             if (!stop1Response.ok || !stop2Response.ok) {
@@ -112,14 +110,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Parse JSON responses
-            const [stop1Raw, stop2Raw] = await Promise.all([
+            const [stop1Data, stop2Data] = await Promise.all([
                 stop1Response.json(),
                 stop2Response.json()
             ]);
-            
-            // The proxy returns data in a 'contents' property as a string
-            const stop1Data = JSON.parse(stop1Raw.contents);
-            const stop2Data = JSON.parse(stop2Raw.contents);
             
             return {
                 stops: {
