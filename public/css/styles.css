@@ -1,0 +1,138 @@
+:root {
+    --bg: #2E3440;
+    --text: #E5E9F0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    margin: 0;
+    padding: 16px;
+    line-height: 1.5;
+    max-width: 800px;
+    margin: 0 auto;
+    color: var(--text);
+    background-color: var(--bg);
+}
+
+main {
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+h2 {
+    margin-bottom: 16px;
+}
+
+section {
+    margin-bottom: 28px;
+}
+
+/* Train list */
+#arrivals-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.train {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-bottom: 1px solid #d8dee9;
+}
+
+.line {
+    font-weight: bold;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dest {
+    font-size: 14px;
+    color: #E5E9F0;
+}
+
+.time {
+    font-weight: bold;
+    font-size: 18px;
+    color: #ECEFF4;
+}
+
+/* Controls section */
+#controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #B48EAD;
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+button:disabled {
+    filter: grayscale(0.5);
+    cursor: not-allowed;
+}
+
+#last-updated {
+    color: #E5E9F0;
+    font-size: 14px;
+}
+
+/* API key section */
+#api-key {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+#api-key-input {
+    padding: 8px;
+    border: 1px solid #d8dee9;
+    border-radius: 4px;
+}
+
+#api-key-status {
+    grid-column: span 2;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 500px) {
+    body {
+        padding: 12px;
+    }
+    
+    #controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #api-key {
+        grid-template-columns: 1fr;
+    }
+}
