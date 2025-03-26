@@ -80,6 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (error) {
             console.error('Error fetching cached arrivals:', error)
+            if (window.localStorage.getItem(API_KEY_STORAGE)) {
+                console.log('Fetching via saved API key:')
+                return fetchDirectFromApi()
+            }
             return null
         }
     }
@@ -237,50 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to render arrivals for an individual stop
-    function renderArrivals(stopData, element) {
-        if (!stopData) {
-            element.innerHTML = '<p>No data available</p>'
-            return
-        }
-
-        try {
-            // Check if we have monitoring deliveries
-            const monitoredStopVisit = stopData.ServiceDelivery?.StopMonitoringDelivery?.MonitoredStopVisit
-
-            if (!monitoredStopVisit || monitoredStopVisit.length === 0) {
-                element.innerHTML = '<p>No arrivals scheduled</p>'
-                return
-            }
-
-            // Create HTML for arrivals
-            const arrivalsHTML = monitoredStopVisit.map(visit => {
-                const vehicle = visit.MonitoredVehicleJourney
-                const line = vehicle.LineRef
-                const destination = vehicle.DestinationName
-                const expectedArrival = vehicle.MonitoredCall?.ExpectedArrivalTime
-
-                let arrivalTime = 'Schedule unavailable'
-                if (expectedArrival) {
-                    arrivalTime = formatArrivalTime(expectedArrival)
-                }
-
-                return `
-                    <div class="arrival">
-                        <div class="line">${line}</div>
-                        <div class="destination">${destination}</div>
-                        <div class="time">${arrivalTime}</div>
-                    </div>
-                `
-            }).join('')
-
-            element.innerHTML = arrivalsHTML
-        } catch (error) {
-            console.error('Error rendering arrival data:', error)
-            element.innerHTML = '<p>Error processing arrival data</p>'
-        }
-    }
-
     // Function to update the UI
     function updateUI(data) {
         if (!data) {
@@ -307,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set up auto-refresh every 60 seconds
     setInterval(() => {
         fetchCachedArrivals().then(updateUI)
-    }, 60000)
+    }, 60_000)
 
     // Cache refresh button
     refreshBtn.addEventListener('click', async () => {
