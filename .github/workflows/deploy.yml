@@ -36,8 +36,8 @@ jobs:
         run: |
           cd main-repo
           mkdir -p dist
-          cp -r css/* dist/css/
-          cp -r js/* dist/js/
+          cp -r css dist/
+          cp -r js dist/
           
       - name: Preserve data directory
         run: |
