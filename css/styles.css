@@ -83,8 +83,8 @@ section {
 
 button {
     padding: 8px 16px;
-    background-color: #B48EAD;
-    color: var(--text);
+    background-color: #88c0d0;
+    color: #2e3440;
     border: none;
     border-radius: 8px;
     cursor: pointer;
