@@ -1,9 +1,9 @@
+let interval
+
 document.addEventListener('DOMContentLoaded', function () {
     // Get DOM elements
-    const refreshBtn = document.getElementById('refresh-btn')
     const apiRefreshBtn = document.getElementById('api-refresh-btn')
     const lastUpdatedEl = document.getElementById('last-updated')
-    // Removed individual stop elements as they're no longer in the HTML
     const apiKeyInput = document.getElementById('api-key-input')
     const saveApiKeyBtn = document.getElementById('save-api-key')
     const apiKeyStatus = document.getElementById('api-key-status')
@@ -80,10 +80,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (error) {
             console.error('Error fetching cached arrivals:', error)
-            if (window.localStorage.getItem(API_KEY_STORAGE)) {
-                console.log('Fetching via saved API key:')
-                return fetchDirectFromApi()
-            }
             return null
         }
     }
@@ -186,7 +182,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         line: 'N',
                         lineColor: '#5e81ac',
                         destination: getFormattedDestination(vehicle),
-                        destinationDisplay: getFormattedDestination(vehicle),
                         expectedArrival: vehicle.MonitoredCall?.ExpectedArrivalTime,
                         rawTime: getMinutesUntilArrival(vehicle.MonitoredCall?.ExpectedArrivalTime)
                     })
@@ -202,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         line: 'J',
                         lineColor: '#d08770',
                         destination: getFormattedDestination(vehicle),
-                        destinationDisplay: getFormattedDestination(vehicle),
                         expectedArrival: vehicle.MonitoredCall?.ExpectedArrivalTime,
                         rawTime: getMinutesUntilArrival(vehicle.MonitoredCall?.ExpectedArrivalTime)
                     })
@@ -211,6 +205,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Sort all arrivals by time
             allArrivals.sort((a, b) => a.rawTime - b.rawTime)
+
+            while (allArrivals.length > 0 && allArrivals[0].rawTime < 0) {
+                // Remove any trains that have already left
+                allArrivals.shift()
+            }
 
             // No arrivals
             if (allArrivals.length === 0) {
@@ -228,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return `
                     <li class="train">
                         <span class="line" style="background-color: ${arrival.lineColor}">${arrival.line}</span>
-                        <span class="dest">${arrival.destinationDisplay}</span>
+                        <span class="dest">${arrival.destination}</span>
                         <span class="time">${formattedTime}</span>
                     </li>
                 `
@@ -264,34 +263,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial data fetch from cache
     fetchCachedArrivals().then(updateUI)
 
-    // Set up auto-refresh every 60 seconds
-    setInterval(() => {
-        fetchCachedArrivals().then(updateUI)
+    // Set up auto-refresh from API every 60 seconds
+    interval = setInterval(() => {
+        fetchDirectFromApi().then(data => {
+            if (data) updateUI(data)
+        })
     }, 60_000)
-
-    // Cache refresh button
-    refreshBtn.addEventListener('click', async () => {
-        refreshBtn.disabled = true
-        refreshBtn.textContent = 'Refreshing...'
-
-        const data = await fetchCachedArrivals()
-        updateUI(data)
-
-        refreshBtn.disabled = false
-        refreshBtn.textContent = 'Refresh Cache'
-    })
 
     // Direct API fetch button
     apiRefreshBtn.addEventListener('click', async () => {
         apiRefreshBtn.disabled = true
-        apiRefreshBtn.textContent = 'Fetching...'
+        apiRefreshBtn.textContent = 'Updating...'
 
         const data = await fetchDirectFromApi()
-        if (data) {
-            updateUI(data)
-        }
+        if (data) updateUI(data)
 
         apiRefreshBtn.disabled = false
-        apiRefreshBtn.textContent = 'Direct API Fetch'
+        apiRefreshBtn.textContent = 'Update'
     })
+})
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clearInterval(interval)
 })
