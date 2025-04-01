@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Muni Metro Arrivals</title>
     <link rel="stylesheet" href="./css/styles.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 </head>
+
 <body>
     <main>
         <h1>Muni Metro Arrivals</h1>
-        
+
         <section id="trains">
             <h2>Upcoming Trains</h2>
             <ul id="arrivals-list">Loading arrivals...</ul>
         </section>
-        
+
         <section id="controls">
             <div id="last-updated">Last Updated: Never</div>
             <button id="api-refresh-btn">Update</button>
         </section>
-        
+
         <section id="api-key">
             <input type="password" id="api-key-input" placeholder="Enter your 511.org API Key" />
             <button id="save-api-key">Save API Key</button>
@@ -29,4 +35,5 @@
 
     <script src="./js/app.js"></script>
 </body>
+
 </html>
