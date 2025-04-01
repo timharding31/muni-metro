@@ -4,7 +4,7 @@
   "description": "SF Muni Metro train arrival monitor",
   "private": true,
   "scripts": {
-    "dev": "npx http-server .",
+    "dev": "npx http-server ./public",
     "test": "echo \"No tests specified\""
   },
   "keywords": ["sf-muni", "transit", "train-tracker", "github-pages"],
