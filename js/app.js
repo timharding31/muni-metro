@@ -17,9 +17,13 @@ const STOP_CODES = {
     J_CHURCH: '17073'
 }
 
+function getApiKey() {
+    return localStorage.getItem(API_KEY_STORAGE)
+}
+
 // Load the API key from local storage if available
 function loadApiKey() {
-    const apiKey = localStorage.getItem(API_KEY_STORAGE)
+    const apiKey = getApiKey()
     if (apiKey) {
         apiKeyInput.value = apiKey
         apiKeyStatus.textContent = 'API key loaded from storage'
@@ -70,7 +74,7 @@ async function fetchCachedArrivals() {
 
 // Function to fetch data directly from 511.org API
 async function fetchDirectFromApi() {
-    const apiKey = localStorage.getItem(API_KEY_STORAGE)
+    const apiKey = getApiKey()
     if (!apiKey) {
         apiKeyStatus.textContent = 'Please enter and save your API key first'
         apiKeyStatus.style.color = '#BF616A'
@@ -78,7 +82,6 @@ async function fetchDirectFromApi() {
     }
 
     try {
-        // Create a proxy URL to avoid CORS issues
         const createFetchUrl = (stopCode) => {
             return `https://api.511.org/transit/StopMonitoring?api_key=${apiKey}&agency=SF&stopCode=${stopCode}&format=json`
         }
@@ -242,14 +245,13 @@ function updateUI(data) {
 }
 
 function startPolling() {
-    if (interval) {
-        stopPolling()
-    }
-    interval = setInterval(() => {
-        fetchDirectFromApi().then(data => {
+    stopPolling()
+    if (getApiKey()) {
+        interval = setInterval(async () => {
+            const data = await fetchDirectFromApi()
             if (data) updateUI(data)
-        })
-    }, 60_000)
+        }, 60_000)
+    }
 }
 
 function stopPolling() {
@@ -265,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial data fetch from cache
     fetchCachedArrivals().then(updateUI)
-    
+
     startPolling()
 
     // Direct API fetch button
@@ -288,6 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
             apiKeyStatus.textContent = 'API key saved'
             apiKeyStatus.style.color = '#A3BE8C'
             apiRefreshBtn.disabled = false
+            startPolling()
         } else {
             apiKeyStatus.textContent = 'Please enter a valid API key'
             apiKeyStatus.style.color = '#BF616A'
