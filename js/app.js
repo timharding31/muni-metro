@@ -231,7 +231,9 @@ function renderCombinedArrivals(data) {
 
             return `
                     <li class="train">
-                        <span class="line" style="background-color: ${arrival.lineColor}">${arrival.line}</span>
+                        <div class="line" style="background-color: ${arrival.lineColor}">
+                            <span>${arrival.line}</span>
+                        </div>
                         <span class="dest">${arrival.destination}</span>
                         <span class="time">${formattedTime}</span>
                     </li>
