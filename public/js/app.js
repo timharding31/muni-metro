@@ -5,16 +5,19 @@ const apiRefreshBtn = document.getElementById('api-refresh-btn')
 const lastUpdatedEl = document.getElementById('last-updated')
 const apiKeyInput = document.getElementById('api-key-input')
 const saveApiKeyBtn = document.getElementById('save-api-key')
+const removeApiKeyBtn = document.getElementById('remove-api-key')
 const apiKeyStatus = document.getElementById('api-key-status')
 const arrivalsListEl = document.getElementById('arrivals-list')
 
-// Local storage key for API key
+// Local storage keys
 const API_KEY_STORAGE = 'muni-metro-api-key'
+const API_DATA_STORAGE = 'muni-metro-data'
+const API_DATA_TIMESTAMP = 'muni-metro-data-timestamp'
 
 // Stop codes
 const STOP_CODES = {
     N_JUDAH: '14448',
-    J_CHURCH: '17073'
+    J_CHURCH: '14006'
 }
 
 function getApiKey() {
@@ -29,10 +32,20 @@ function loadApiKey() {
         apiKeyStatus.textContent = 'API key loaded from storage'
         apiKeyStatus.style.color = '#A3BE8C'
         apiRefreshBtn.disabled = false
+        
+        // Hide input and save button, show remove button
+        apiKeyInput.hidden = true
+        saveApiKeyBtn.hidden = true
+        removeApiKeyBtn.hidden = false
     } else {
         apiKeyStatus.textContent = 'No API key saved. Enter your key to enable direct fetching.'
         apiKeyStatus.style.color = '#EBCB8B'
         apiRefreshBtn.disabled = true
+        
+        // Show input and save button, hide remove button
+        apiKeyInput.hidden = false
+        saveApiKeyBtn.hidden = false
+        removeApiKeyBtn.hidden = true
     }
 }
 
@@ -42,7 +55,7 @@ async function fetchCachedArrivals() {
         // Fetch all data files in parallel
         const [stop1Response, stop2Response, metadataResponse] = await Promise.all([
             fetch('./data/stop-14448.json'),
-            fetch('./data/stop-17073.json'),
+            fetch('./data/stop-14006.json'),
             fetch('./data/metadata.json')
         ])
 
@@ -78,6 +91,11 @@ async function fetchDirectFromApi() {
     if (!apiKey) {
         apiKeyStatus.textContent = 'Please enter and save your API key first'
         apiKeyStatus.style.color = '#BF616A'
+        
+        // Ensure input and save button are visible if API key is missing
+        apiKeyInput.hidden = false
+        saveApiKeyBtn.hidden = false
+        removeApiKeyBtn.hidden = true
         return null
     }
 
@@ -227,11 +245,46 @@ function renderCombinedArrivals(data) {
     }
 }
 
+// Function to save data to localStorage
+function saveDataToLocalStorage(data) {
+    if (!data) return
+    
+    try {
+        localStorage.setItem(API_DATA_STORAGE, JSON.stringify(data))
+        localStorage.setItem(API_DATA_TIMESTAMP, new Date().toISOString())
+    } catch (error) {
+        console.error('Error saving data to localStorage:', error)
+    }
+}
+
+// Function to load data from localStorage
+function getDataFromLocalStorage() {
+    try {
+        const data = localStorage.getItem(API_DATA_STORAGE)
+        const timestamp = localStorage.getItem(API_DATA_TIMESTAMP)
+        
+        if (!data || !timestamp) return null
+        
+        return {
+            ...JSON.parse(data),
+            source: 'localStorage'
+        }
+    } catch (error) {
+        console.error('Error loading data from localStorage:', error)
+        return null
+    }
+}
+
 // Function to update the UI
 function updateUI(data) {
     if (!data) {
         arrivalsListEl.innerHTML = '<p>Failed to load data</p>'
         return
+    }
+
+    // Save the data to localStorage if it's from API
+    if (data.source === 'API direct') {
+        saveDataToLocalStorage(data)
     }
 
     // Update last updated time
@@ -265,9 +318,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize
     loadApiKey()
 
-    // Initial data fetch from cache
-    fetchCachedArrivals().then(updateUI)
+    // First try to get data from localStorage
+    const storedData = getDataFromLocalStorage()
+    
+    if (storedData) {
+        // If we have stored data, use it immediately
+        updateUI(storedData)
+    } else {
+        // Fall back to cache if no localStorage data
+        fetchCachedArrivals().then(updateUI)
+    }
 
+    // Start polling if we have an API key
     startPolling()
 
     // Direct API fetch button
@@ -290,12 +352,39 @@ document.addEventListener('DOMContentLoaded', function () {
             apiKeyStatus.textContent = 'API key saved'
             apiKeyStatus.style.color = '#A3BE8C'
             apiRefreshBtn.disabled = false
+            
+            // Hide input and save button, show remove button
+            apiKeyInput.hidden = true
+            saveApiKeyBtn.hidden = true
+            removeApiKeyBtn.hidden = false
+            
             startPolling()
         } else {
             apiKeyStatus.textContent = 'Please enter a valid API key'
             apiKeyStatus.style.color = '#BF616A'
             apiRefreshBtn.disabled = true
         }
+    })
+    
+    // Remove API key button
+    removeApiKeyBtn.addEventListener('click', () => {
+        localStorage.removeItem(API_KEY_STORAGE)
+        localStorage.removeItem(API_DATA_STORAGE)
+        localStorage.removeItem(API_DATA_TIMESTAMP)
+        apiKeyInput.value = ''
+        apiKeyStatus.textContent = 'API key removed'
+        apiKeyStatus.style.color = '#EBCB8B'
+        apiRefreshBtn.disabled = true
+        
+        // Show input and save button, hide remove button
+        apiKeyInput.hidden = false
+        saveApiKeyBtn.hidden = false
+        removeApiKeyBtn.hidden = true
+        
+        stopPolling()
+        
+        // Reload data from cache since we cleared localStorage
+        fetchCachedArrivals().then(updateUI)
     })
 })
 

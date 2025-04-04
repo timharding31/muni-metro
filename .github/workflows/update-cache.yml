@@ -27,8 +27,8 @@ jobs:
           # Fetch data for N-Judah stop (14448) with proper handling of compressed responses
           curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14448&format=json" > data/stop-14448.json || echo "Failed to fetch N-Judah data"
           
-          # Fetch data for J-Church stop (17073) with proper handling of compressed responses
-          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=17073&format=json" > data/stop-17073.json || echo "Failed to fetch J-Church data"
+          # Fetch data for J-Church stop (14006) with proper handling of compressed responses
+          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14006&format=json" > data/stop-14006.json || echo "Failed to fetch J-Church data"
           
           # Create metadata file with timestamp
           echo "{\"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > data/metadata.json
@@ -38,7 +38,7 @@ jobs:
           cat data/stop-14448.json | jq . > /dev/null || echo "Warning: N-Judah data is not valid JSON"
           
           echo "Validating J-Church data..."
-          cat data/stop-17073.json | jq . > /dev/null || echo "Warning: J-Church data is not valid JSON"
+          cat data/stop-14006.json | jq . > /dev/null || echo "Warning: J-Church data is not valid JSON"
       
       - name: Commit and push changes
         run: |
