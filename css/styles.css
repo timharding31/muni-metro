@@ -1,6 +1,7 @@
 :root {
     --bg: #2E3440;
-    --text: #E5E9F0;
+    --text-1: #ECEFF4;
+    --text-2: #E5E9F0;
 }
 
 body {
@@ -10,7 +11,7 @@ body {
     line-height: 1.5;
     max-width: 800px;
     margin: 0 auto;
-    color: var(--text);
+    color: var(--text-1);
     background-color: var(--bg);
 }
 
@@ -74,13 +75,12 @@ section {
 
 .dest {
     font-size: 14px;
-    color: #E5E9F0;
+    color: var(--text-2);
 }
 
 .time {
     font-weight: bold;
     font-size: 18px;
-    color: #ECEFF4;
 }
 
 /* Controls section */
@@ -109,7 +109,7 @@ button:disabled {
 }
 
 #last-updated {
-    color: #E5E9F0;
+    color: var(--text-2);
     font-size: 14px;
 }
 
@@ -126,9 +126,26 @@ button:disabled {
     border-radius: 4px;
 }
 
-#api-key-status {
-    grid-column: span 2;
+.status-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 8px;
+    width: 100%;
+}
+
+#api-key-status {
+    font-size: 14px;
+}
+
+#remove-api-key {
+    background: none;
+    color: var(--text-2);
+    padding: 0;
+    border: none;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
     font-size: 14px;
 }
 
