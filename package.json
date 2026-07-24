@@ -1,13 +1,18 @@
 {
   "name": "muni-metro",
   "version": "1.0.0",
-  "description": "SF Muni Metro train arrival monitor",
+  "description": "SF Muni bus arrival monitor",
   "private": true,
   "scripts": {
     "dev": "npx http-server ./public",
     "test": "echo \"No tests specified\""
   },
-  "keywords": ["sf-muni", "transit", "train-tracker", "github-pages"],
+  "keywords": [
+    "sf-muni",
+    "transit",
+    "train-tracker",
+    "github-pages"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
