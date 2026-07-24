@@ -4,7 +4,7 @@ A simple web application that displays real-time arrival information for SF Muni
 
 ## Features
 
-- Displays inbound train arrivals for two nearby stops (N-Judah and J-Church)
+- Displays bus arrivals for the 12 and 1 lines, switching between inbound (mornings) and outbound (evenings) stops based on time of day
 - Updates data every 5 minutes during weekday commute times
 - Simple, mobile-friendly web interface
 - Static site hosted on GitHub Pages
@@ -20,6 +20,7 @@ This application takes a serverless approach:
 4. The site automatically refreshes to show the latest data
 
 This approach has several advantages:
+
 - Completely free to host (no server costs)
 - Simple architecture with no backend server to maintain
 - Reliable, with GitHub's infrastructure handling the scheduled updates
@@ -35,7 +36,6 @@ This approach has several advantages:
 ### Deployment Steps
 
 1. **Fork this repository**
-   
 2. **Set up your API key in GitHub Secrets**
    - Go to your repository on GitHub
    - Navigate to Settings > Secrets and variables > Actions
@@ -62,12 +62,14 @@ This approach has several advantages:
 ### Local Development
 
 1. Clone your repository
+
    ```
    git clone https://github.com/[your-username]/muni-metro.git
    cd muni-metro
    ```
 
 2. Serve the files locally
+
    ```
    npx http-server public
    ```
@@ -78,17 +80,19 @@ This approach has several advantages:
 
 ### Modifying the Update Schedule
 
-The default schedule updates data every 5 minutes during weekday commute hours (5am-4pm Pacific Time). 
+The default schedule updates data every 5 minutes during weekday commute windows: 8am-11am (inbound) and 4pm-8pm (outbound), Pacific Time. Cron is expressed in UTC and assumes PDT (UTC-7), so runs shift an hour earlier during PST.
 
 To change this schedule:
+
 1. Edit `.github/workflows/update-cache.yml`
 2. Modify the `cron` value in the `schedule` section
 3. Commit and push your changes
 
 ### Adding More Stops
 
-1. Update the list of stop codes in the GitHub workflow file
-2. Modify the frontend code to display the additional stops
+1. Update the list of stop codes in `.github/workflows/update-cache.yml`
+2. Add the stop to the `STOPS` config in `public/js/app.js` (line, direction, and name)
+3. Add the stop to the `INBOUND_STOPS` or `OUTBOUND_STOPS` array so it renders in the right mode
 
 ## Project Structure
 

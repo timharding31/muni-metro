@@ -2,7 +2,10 @@ name: Update Muni Data Cache
 
 on:
   schedule:
-    - cron: '*/5 12-23 * * 1-5'  # Every 5 minutes, 5am-4pm PT (12-23 UTC) on weekdays
+    # Weekday commute windows, Pacific Time. Cron is UTC; these assume PDT (UTC-7),
+    # so they run an hour early during PST. Adjust if needed.
+    - cron: '*/5 15-18 * * 1-5'        # 8am-11:59am PT — inbound
+    - cron: '*/5 23,0,1,2,3 * * 1-5'   # 4pm-8:59pm PT — outbound
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
@@ -23,22 +26,28 @@ jobs:
       - name: Fetch latest Muni data
         run: |
           mkdir -p data
-          
-          # Fetch data for N-Judah stop (14448) with proper handling of compressed responses
-          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14448&format=json" > data/stop-14448.json || echo "Failed to fetch N-Judah data"
-          
-          # Fetch data for J-Church stop (14006) with proper handling of compressed responses
-          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14006&format=json" > data/stop-14006.json || echo "Failed to fetch J-Church data"
-          
+           
+          # Inbound: 12 from Pacific Ave & Polk St (15851)
+          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=15851&format=json" > data/stop-15851.json || echo "Failed to fetch 12 inbound data"
+           
+          # Inbound: 1 from Clay St & Polk St (14026)
+          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=14026&format=json" > data/stop-14026.json || echo "Failed to fetch 1 inbound data"
+           
+          # Outbound: 12 and 1 from Sacramento St & Battery St (16290)
+          curl -s -H "Accept-Encoding: gzip, deflate" --compressed "https://api.511.org/transit/StopMonitoring?api_key=${{ secrets.API_KEY }}&agency=SF&stopCode=16290&format=json" > data/stop-16290.json || echo "Failed to fetch outbound data"
+           
           # Create metadata file with timestamp
           echo "{\"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > data/metadata.json
-          
+           
           # Verify JSON is valid
-          echo "Validating N-Judah data..."
-          cat data/stop-14448.json | jq . > /dev/null || echo "Warning: N-Judah data is not valid JSON"
-          
-          echo "Validating J-Church data..."
-          cat data/stop-14006.json | jq . > /dev/null || echo "Warning: J-Church data is not valid JSON"
+          echo "Validating 12 inbound data..."
+          cat data/stop-15851.json | jq . > /dev/null || echo "Warning: 12 inbound data is not valid JSON"
+           
+          echo "Validating 1 inbound data..."
+          cat data/stop-14026.json | jq . > /dev/null || echo "Warning: 1 inbound data is not valid JSON"
+
+          echo "Validating outbound data..."
+          cat data/stop-16290.json | jq . > /dev/null || echo "Warning: outbound data is not valid JSON"
       
       - name: Commit and push changes
         run: |

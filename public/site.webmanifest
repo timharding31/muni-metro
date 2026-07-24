@@ -1,5 +1,5 @@
 {
-  "name": "Muni Metro - N or J",
+  "name": "SF Muni - N or J",
   "short_name": "N or J",
   "icons": [
     {
@@ -13,9 +13,9 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#2E3440",
-  "background_color": "#2E3440",
-  "accent_color": "#88C0D0",
+  "theme_color": "#1a1b26",
+  "background_color": "#1a1b26",
+  "accent_color": "#7aa2f7",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone"
