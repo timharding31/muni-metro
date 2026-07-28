@@ -26,28 +26,28 @@ const STOPS = {
     name: "Pacific & Polk",
     lines: ["12"],
     direction: "OB",
-    lineColor: { 12: "#7aa2f7" },
+    lineColor: { 12: "#5e81ac" },
   },
   INBOUND_1: {
     code: "14026",
     name: "Clay & Polk",
     lines: ["1"],
     direction: "IB",
-    lineColor: { 1: "#ff9e64" },
+    lineColor: { 1: "#d08770" },
   },
   OUTBOUND_12: {
     code: "16290",
     name: "Sacramento & Battery",
     lines: ["12"],
     direction: "IB",
-    lineColor: { 12: "#7aa2f7" },
+    lineColor: { 12: "#5e81ac" },
   },
   OUTBOUND_1: {
     code: "16290",
     name: "Sacramento & Battery",
     lines: ["1"],
     direction: "OB",
-    lineColor: { 1: "#ff9e64" },
+    lineColor: { 1: "#d08770" },
   },
 };
 
@@ -65,7 +65,7 @@ function loadApiKey() {
   if (apiKey) {
     apiKeyInput.value = apiKey;
     apiKeyStatus.textContent = "API key loaded from storage";
-    apiKeyStatus.style.color = "#9ece6a";
+    apiKeyStatus.style.color = "#A3BE8C";
     apiRefreshBtn.disabled = false;
 
     // Hide input and save button, show remove button
@@ -75,7 +75,7 @@ function loadApiKey() {
   } else {
     apiKeyStatus.textContent =
       "No API key saved. Enter your key to enable direct fetching.";
-    apiKeyStatus.style.color = "#e0af68";
+    apiKeyStatus.style.color = "#EBCB8B";
     apiRefreshBtn.disabled = true;
 
     // Show input and save button, hide remove button
@@ -138,7 +138,7 @@ async function fetchDirectFromApi() {
   const apiKey = getApiKey();
   if (!apiKey) {
     apiKeyStatus.textContent = "Please enter and save your API key first";
-    apiKeyStatus.style.color = "#f7768e";
+    apiKeyStatus.style.color = "#BF616A";
 
     // Ensure input and save button are visible if API key is missing
     apiKeyInput.hidden = false;
@@ -180,7 +180,7 @@ async function fetchDirectFromApi() {
   } catch (error) {
     console.error("Error fetching directly from API:", error);
     apiKeyStatus.textContent = "API fetch failed. Check console for details.";
-    apiKeyStatus.style.color = "#f7768e";
+    apiKeyStatus.style.color = "#BF616A";
     return null;
   }
 }
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (apiKey) {
       localStorage.setItem(API_KEY_STORAGE, apiKey);
       apiKeyStatus.textContent = "API key saved";
-      apiKeyStatus.style.color = "#9ece6a";
+      apiKeyStatus.style.color = "#A3BE8C";
       apiRefreshBtn.disabled = false;
 
       // Hide input and save button, show remove button
@@ -478,7 +478,7 @@ document.addEventListener("DOMContentLoaded", function () {
       startPolling();
     } else {
       apiKeyStatus.textContent = "Please enter a valid API key";
-      apiKeyStatus.style.color = "#f7768e";
+      apiKeyStatus.style.color = "#BF616A";
       apiRefreshBtn.disabled = true;
     }
   });
@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.removeItem(API_DATA_TIMESTAMP);
     apiKeyInput.value = "";
     apiKeyStatus.textContent = "API key removed";
-    apiKeyStatus.style.color = "#e0af68";
+    apiKeyStatus.style.color = "#EBCB8B";
     apiRefreshBtn.disabled = true;
 
     // Show input and save button, hide remove button

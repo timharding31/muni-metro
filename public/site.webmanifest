@@ -13,9 +13,9 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#1a1b26",
-  "background_color": "#1a1b26",
-  "accent_color": "#7aa2f7",
+  "theme_color": "#2E3440",
+  "background_color": "#2E3440",
+  "accent_color": "#88C0D0",
   "start_url": "/muni-metro/index.html",
   "scope": "/muni-metro/",
   "display": "standalone"

@@ -1,7 +1,7 @@
 :root {
-    --bg: #1a1b26;
-    --text-1: #c0caf5;
-    --text-2: #a9b1d6;
+    --bg: #2E3440;
+    --text-1: #ECEFF4;
+    --text-2: #E5E9F0;
 }
 
 body {
@@ -88,7 +88,7 @@ section {
     align-items: center;
     gap: 12px;
     padding: 12px 8px;
-    border-bottom: 1px solid #3b4261;
+    border-bottom: 1px solid #d8dee9;
 }
 
 .line {
@@ -103,7 +103,7 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1a1b26;
+    color: #2E3440;
 }
 
 .dest {
@@ -127,8 +127,8 @@ section {
 
 button {
     padding: 8px 16px;
-    background-color: #7aa2f7;
-    color: #1a1b26;
+    background-color: #88c0d0;
+    color: #2e3440;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -155,9 +155,9 @@ button:disabled {
 
 #api-key-input {
     padding: 8px;
-    border: 1px solid #3b4261;
+    border: 1px solid #d8dee9;
     border-radius: 4px;
-    background-color: #1f2335;
+    background-color: #3B4252;
     color: var(--text-1);
 }
 
