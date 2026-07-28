@@ -25,7 +25,7 @@ const STOPS = {
     code: "15851",
     name: "Pacific & Polk",
     lines: ["12"],
-    direction: "IB",
+    direction: "OB",
     lineColor: { 12: "#7aa2f7" },
   },
   INBOUND_1: {
@@ -35,17 +35,24 @@ const STOPS = {
     direction: "IB",
     lineColor: { 1: "#ff9e64" },
   },
-  OUTBOUND: {
+  OUTBOUND_12: {
     code: "16290",
     name: "Sacramento & Battery",
-    lines: ["12", "1"],
+    lines: ["12"],
+    direction: "IB",
+    lineColor: { 12: "#7aa2f7" },
+  },
+  OUTBOUND_1: {
+    code: "16290",
+    name: "Sacramento & Battery",
+    lines: ["1"],
     direction: "OB",
-    lineColor: { 12: "#7aa2f7", 1: "#ff9e64" },
+    lineColor: { 1: "#ff9e64" },
   },
 };
 
 const INBOUND_STOPS = [STOPS.INBOUND_12, STOPS.INBOUND_1];
-const OUTBOUND_STOPS = [STOPS.OUTBOUND];
+const OUTBOUND_STOPS = [STOPS.OUTBOUND_12, STOPS.OUTBOUND_1];
 const MAX_ARRIVALS = 5;
 
 function getApiKey() {
@@ -91,7 +98,7 @@ async function fetchCachedArrivals() {
       await Promise.all([
         fetch(`./data/stop-${STOPS.INBOUND_12.code}.json`),
         fetch(`./data/stop-${STOPS.INBOUND_1.code}.json`),
-        fetch(`./data/stop-${STOPS.OUTBOUND.code}.json`),
+        fetch(`./data/stop-${STOPS.OUTBOUND_12.code}.json`),
         fetch("./data/metadata.json"),
       ]);
 
@@ -115,7 +122,7 @@ async function fetchCachedArrivals() {
       stops: {
         [STOPS.INBOUND_12.code]: s1Data,
         [STOPS.INBOUND_1.code]: s2Data,
-        [STOPS.OUTBOUND.code]: s3Data,
+        [STOPS.OUTBOUND_12.code]: s3Data,
       },
       lastUpdated: metadata.lastUpdated,
       source: "cache",
@@ -148,7 +155,7 @@ async function fetchDirectFromApi() {
     const [s1Response, s2Response, s3Response] = await Promise.all([
       fetch(createFetchUrl(STOPS.INBOUND_12.code)),
       fetch(createFetchUrl(STOPS.INBOUND_1.code)),
-      fetch(createFetchUrl(STOPS.OUTBOUND.code)),
+      fetch(createFetchUrl(STOPS.OUTBOUND_12.code)),
     ]);
 
     if (!s1Response.ok || !s2Response.ok || !s3Response.ok) {
@@ -165,7 +172,7 @@ async function fetchDirectFromApi() {
       stops: {
         [STOPS.INBOUND_12.code]: s1Data,
         [STOPS.INBOUND_1.code]: s2Data,
-        [STOPS.OUTBOUND.code]: s3Data,
+        [STOPS.OUTBOUND_12.code]: s3Data,
       },
       lastUpdated: new Date().toISOString(),
       source: "API direct",
