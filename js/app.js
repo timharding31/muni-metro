@@ -10,7 +10,39 @@ const saveApiKeyBtn = document.getElementById("save-api-key");
 const removeApiKeyBtn = document.getElementById("remove-api-key");
 const apiKeyStatus = document.getElementById("api-key-status");
 const arrivalsListEl = document.getElementById("arrivals-list");
-const modeLabelEl = document.getElementById("mode-label");
+
+// Icons
+const ARROW_SIZE = 16;
+const ICON_SIZE = 20;
+const BUS_SIZE = 32;
+const arrow = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${ARROW_SIZE}" height="${ARROW_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8L22 12L18 16"/>
+    <path d="M2 12H22"/>
+  </svg>
+`.trim();
+const house = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house">
+    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+    <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+  </svg>
+`.trim();
+const factory = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 16h.01"/><path d="M16 16h.01"/>
+    <path d="M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M8 16h.01"/>
+  </svg>
+`.trim();
+const bus = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${BUS_SIZE}" height="${BUS_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 6v6"/>
+    <path d="M15 6v6"/>
+    <path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+    <circle cx="7" cy="18" r="2"/>
+    <path d="M9 18h5"/>
+    <circle cx="16" cy="18" r="2"/>
+  </svg>
+`.trim();
 
 // Local storage keys
 const API_KEY_STORAGE = "muni-metro-api-key";
@@ -54,6 +86,7 @@ const STOPS = {
 const INBOUND_STOPS = [STOPS.INBOUND_12, STOPS.INBOUND_1];
 const OUTBOUND_STOPS = [STOPS.OUTBOUND_12, STOPS.OUTBOUND_1];
 const MAX_ARRIVALS = 5;
+const POLL_INTERVAL_MS = 30_000;
 
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE);
@@ -257,7 +290,10 @@ function arrivalRowHTML(arrival) {
   return `
             <li class="train">
                 <div class="line" style="background-color: ${arrival.lineColor}">
-                    <span>${arrival.line}</span>
+                <span>${arrival.line}</span>
+                </div>
+                <div class="bus">
+                    ${bus}
                 </div>
                 <span class="dest">${arrival.destination}</span>
                 <span class="time">${formattedTime}</span>
@@ -276,11 +312,6 @@ function renderArrivals(data) {
 
   const mode = currentMode();
   renderedMode = mode;
-
-  if (modeLabelEl) {
-    modeLabelEl.textContent =
-      mode === "AM" ? "Inbound — to work" : "Outbound — from work";
-  }
 
   const stopConfigs = mode === "AM" ? INBOUND_STOPS : OUTBOUND_STOPS;
 
@@ -329,7 +360,11 @@ function renderArrivals(data) {
       const group = groups[code];
       return `
             <li class="stop-group">
-                <h3 class="stop-name">${group.name}</h3>
+                <h3 class="stop-name">
+                  ${group.name}
+                  ${arrow}
+                  ${mode === "AM" ? factory : house}
+                </h3>
                 <ul class="stop-arrivals">
                     ${group.items.map(arrivalRowHTML).join("")}
                 </ul>
@@ -399,7 +434,7 @@ function startPolling() {
     interval = setInterval(async () => {
       const data = await fetchDirectFromApi();
       if (data) updateUI(data);
-    }, 60_000);
+    }, POLL_INTERVAL_MS);
   }
 }
 
@@ -434,15 +469,27 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize
   loadApiKey();
 
-  // First try to get data from localStorage
-  const storedData = getDataFromLocalStorage();
-
-  if (storedData) {
-    // If we have stored data, use it immediately
-    updateUI(storedData);
+  if (getApiKey()) {
+    arrivalsListEl.innerHTML = "<p>Loading live arrivals...</p>";
+    fetchDirectFromApi().then((data) => {
+      if (data) {
+        updateUI(data);
+      } else {
+        const storedData = getDataFromLocalStorage();
+        if (storedData) {
+          updateUI(storedData);
+        } else {
+          fetchCachedArrivals().then(updateUI);
+        }
+      }
+    });
   } else {
-    // Fall back to cache if no localStorage data
-    fetchCachedArrivals().then(updateUI);
+    const storedData = getDataFromLocalStorage();
+    if (storedData) {
+      updateUI(storedData);
+    } else {
+      fetchCachedArrivals().then(updateUI);
+    }
   }
 
   // Start polling if we have an API key
@@ -512,5 +559,10 @@ document.addEventListener("visibilitychange", () => {
   } else {
     startPolling();
     startModeWatcher();
+    if (getApiKey()) {
+      fetchDirectFromApi().then((data) => {
+        if (data) updateUI(data);
+      });
+    }
   }
 });
