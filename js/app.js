@@ -6,41 +6,24 @@ let renderedMode = null;
 const apiRefreshBtn = document.getElementById("api-refresh-btn");
 const lastUpdatedEl = document.getElementById("last-updated");
 const apiKeyInput = document.getElementById("api-key-input");
-const saveApiKeyBtn = document.getElementById("save-api-key");
-const removeApiKeyBtn = document.getElementById("remove-api-key");
 const apiKeyStatus = document.getElementById("api-key-status");
 const arrivalsListEl = document.getElementById("arrivals-list");
+const keyBtn = document.getElementById("key-btn");
+const keyDialog = document.getElementById("key-dialog");
+const removeApiKeyBtn = document.getElementById("remove-api-key");
 
 // Icons
-const ARROW_SIZE = 16;
-const ICON_SIZE = 20;
-const BUS_SIZE = 32;
-const arrow = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${ARROW_SIZE}" height="${ARROW_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M18 8L22 12L18 16"/>
-    <path d="M2 12H22"/>
+const refreshIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+    <path d="M21 3v6h-6"/>
   </svg>
 `.trim();
-const house = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house">
-    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
-    <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-  </svg>
-`.trim();
-const factory = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 16h.01"/><path d="M16 16h.01"/>
-    <path d="M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M8 16h.01"/>
-  </svg>
-`.trim();
-const bus = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${BUS_SIZE}" height="${BUS_SIZE}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M8 6v6"/>
-    <path d="M15 6v6"/>
-    <path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
-    <circle cx="7" cy="18" r="2"/>
-    <path d="M9 18h5"/>
-    <circle cx="16" cy="18" r="2"/>
+const keyIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m15.5 7.5 3 3L22 7l-3-3"/>
+    <path d="m21 2-9.6 9.6"/>
+    <circle cx="7.5" cy="15.5" r="5.5"/>
   </svg>
 `.trim();
 
@@ -87,35 +70,24 @@ const INBOUND_STOPS = [STOPS.INBOUND_12, STOPS.INBOUND_1];
 const OUTBOUND_STOPS = [STOPS.OUTBOUND_12, STOPS.OUTBOUND_1];
 const MAX_ARRIVALS = 5;
 const POLL_INTERVAL_MS = 30_000;
+// At or under this many minutes you need to start walking now
+const LEAVE_NOW_MINUTES = 3;
 
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE);
 }
 
-// Load the API key from local storage if available
-function loadApiKey() {
+// Reflect key state in the status dot and the Update button. Details that used
+// to need their own paragraph now live in the dot's tooltip.
+function updateKeyStatus(message) {
   const apiKey = getApiKey();
-  if (apiKey) {
-    apiKeyInput.value = apiKey;
-    apiKeyStatus.textContent = "API key loaded from storage";
-    apiKeyStatus.style.color = "#A3BE8C";
-    apiRefreshBtn.disabled = false;
-
-    // Hide input and save button, show remove button
-    apiKeyInput.hidden = true;
-    saveApiKeyBtn.hidden = true;
-    removeApiKeyBtn.hidden = false;
-  } else {
-    apiKeyStatus.textContent =
-      "No API key saved. Enter your key to enable direct fetching.";
-    apiKeyStatus.style.color = "#EBCB8B";
-    apiRefreshBtn.disabled = true;
-
-    // Show input and save button, hide remove button
-    apiKeyInput.hidden = false;
-    saveApiKeyBtn.hidden = false;
-    removeApiKeyBtn.hidden = true;
-  }
+  apiKeyStatus.dataset.state = apiKey ? "live" : "cached";
+  apiKeyStatus.title =
+    message ||
+    (apiKey
+      ? "API key saved — fetching live"
+      : "No API key saved. Add one to fetch live arrivals.");
+  apiRefreshBtn.disabled = !apiKey;
 }
 
 // Determine which commute leg to show based on local time of day.
@@ -170,13 +142,7 @@ async function fetchCachedArrivals() {
 async function fetchDirectFromApi() {
   const apiKey = getApiKey();
   if (!apiKey) {
-    apiKeyStatus.textContent = "Please enter and save your API key first";
-    apiKeyStatus.style.color = "#BF616A";
-
-    // Ensure input and save button are visible if API key is missing
-    apiKeyInput.hidden = false;
-    saveApiKeyBtn.hidden = false;
-    removeApiKeyBtn.hidden = true;
+    updateKeyStatus("Please save your API key first");
     return null;
   }
 
@@ -201,6 +167,8 @@ async function fetchDirectFromApi() {
       s3Response.json(),
     ]);
 
+    updateKeyStatus();
+
     return {
       stops: {
         [STOPS.INBOUND_12.code]: s1Data,
@@ -212,24 +180,9 @@ async function fetchDirectFromApi() {
     };
   } catch (error) {
     console.error("Error fetching directly from API:", error);
-    apiKeyStatus.textContent = "API fetch failed. Check console for details.";
-    apiKeyStatus.style.color = "#BF616A";
+    apiKeyStatus.dataset.state = "error";
+    apiKeyStatus.title = "API fetch failed. Check console for details.";
     return null;
-  }
-}
-
-// Function to format time (minutes from now)
-function formatArrivalTime(expectedArrival) {
-  const arrivalTime = new Date(expectedArrival);
-  const now = new Date();
-  const diffMinutes = Math.round((arrivalTime - now) / 60000);
-
-  if (diffMinutes <= 0) {
-    return "Arriving now";
-  } else if (diffMinutes === 1) {
-    return "1 minute";
-  } else {
-    return `${diffMinutes} minutes`;
   }
 }
 
@@ -281,29 +234,57 @@ function extractArrivals(stopData, stopConfig) {
   return arrivals;
 }
 
+// The countdown is what you read from three feet away, so it carries the weight.
+// "Now" and "—" are words rather than figures, and get sized down accordingly.
+function etaHTML(arrival) {
+  if (!arrival.expectedArrival) {
+    return `<span class="eta__num eta__num--word">&mdash;</span>`;
+  }
+  if (arrival.rawTime <= 0) {
+    return `<span class="eta__num eta__num--word">Now</span>`;
+  }
+  return `
+    <span class="eta__num">${arrival.rawTime}</span>
+    <span class="eta__unit">min</span>
+  `;
+}
+
 // Build the HTML for a single arrival row
 function arrivalRowHTML(arrival) {
-  const formattedTime = arrival.expectedArrival
-    ? formatArrivalTime(arrival.expectedArrival)
-    : "Schedule unavailable";
+  const hasEstimate = Boolean(arrival.expectedArrival);
+  const soon = hasEstimate && arrival.rawTime <= LEAVE_NOW_MINUTES;
 
   return `
-            <li class="train">
-                <div class="line" style="background-color: ${arrival.lineColor}">
-                <span>${arrival.line}</span>
-                </div>
-                <div class="bus">
-                    ${bus}
-                </div>
-                <span class="dest">${arrival.destination}</span>
-                <span class="time">${formattedTime}</span>
-            </li>
-        `;
+    <li class="row" data-soon="${soon}" data-stale="${!hasEstimate}">
+      <span class="plate" style="background-color: ${arrival.lineColor}">${arrival.line}</span>
+      <span class="dest">
+        <span class="dest__name">${arrival.destination}</span>
+      </span>
+      <span class="eta">${etaHTML(arrival)}</span>
+    </li>
+  `;
+}
+
+// The header answers "board here, and it takes you there": the stop name, a
+// track that stretches across whatever space is left, then the destination.
+function groupHeaderHTML(stopName, destination) {
+  return `
+    <div class="group__head">
+      <h2 class="stop-name">${stopName}</h2>
+      <span class="track" aria-hidden="true">
+        <span class="track__dot"></span>
+        <span class="track__line"></span>
+        <span class="track__head"></span>
+      </span>
+      <span class="sr-only">to</span>
+      <span class="dest-name">${destination}</span>
+    </div>
+  `;
 }
 
 // Render arrivals for the current time-of-day mode.
-// AM (inbound): arrivals grouped by stop, capped at MAX_ARRIVALS total.
-// PM (outbound): single sorted list, capped at MAX_ARRIVALS.
+// Arrivals are grouped by stop and capped at MAX_ARRIVALS total: AM (inbound)
+// yields one group per stop, PM (outbound) a single group for the shared stop.
 function renderArrivals(data) {
   if (!data || !data.stops) {
     arrivalsListEl.innerHTML = "<p>No arrival data available</p>";
@@ -314,6 +295,7 @@ function renderArrivals(data) {
   renderedMode = mode;
 
   const stopConfigs = mode === "AM" ? INBOUND_STOPS : OUTBOUND_STOPS;
+  const destination = mode === "AM" ? "work" : "home";
 
   // Collect arrivals across the relevant stops
   let allArrivals = [];
@@ -336,13 +318,9 @@ function renderArrivals(data) {
     return;
   }
 
-  if (mode === "PM") {
-    // Single combined list for the one outbound stop
-    arrivalsListEl.innerHTML = capped.map(arrivalRowHTML).join("");
-    return;
-  }
-
-  // AM: group the capped set by stop, ordered by each group's earliest arrival
+  // Group the capped set by stop, ordered by each group's earliest arrival.
+  // PM collapses to a single group (both lines share one outbound stop), but it
+  // still gets a header so the "<stop> -> <destination>" label is always visible.
   const groups = {};
   capped.forEach((arrival) => {
     if (!groups[arrival.stopCode]) {
@@ -355,25 +333,19 @@ function renderArrivals(data) {
     return groups[a].items[0].rawTime - groups[b].items[0].rawTime;
   });
 
-  const html = orderedCodes
+  arrivalsListEl.innerHTML = orderedCodes
     .map((code) => {
       const group = groups[code];
       return `
-            <li class="stop-group">
-                <h3 class="stop-name">
-                  ${group.name}
-                  ${arrow}
-                  ${mode === "AM" ? factory : house}
-                </h3>
-                <ul class="stop-arrivals">
-                    ${group.items.map(arrivalRowHTML).join("")}
-                </ul>
-            </li>
-        `;
+        <li class="group">
+          ${groupHeaderHTML(group.name, destination)}
+          <ul class="rows">
+            ${group.items.map(arrivalRowHTML).join("")}
+          </ul>
+        </li>
+      `;
     })
     .join("");
-
-  arrivalsListEl.innerHTML = html;
 }
 
 // Function to save data to localStorage
@@ -418,14 +390,26 @@ function updateUI(data) {
     saveDataToLocalStorage(data);
   }
 
-  // Update last updated time
+  // Update last updated time. The source is a debugging detail, so it rides in
+  // the tooltip rather than competing with the arrivals.
   if (data.lastUpdated) {
     const lastUpdated = new Date(data.lastUpdated);
-    lastUpdatedEl.textContent = `Last Updated: ${lastUpdated.toLocaleTimeString()} (${data.source})`;
+    lastUpdatedEl.textContent = `Updated ${lastUpdated.toLocaleTimeString()}`;
+    lastUpdatedEl.title = `Source: ${data.source}`;
   }
 
   // Render arrivals for the current mode
   renderArrivals(data);
+}
+
+function setRefreshBusy(busy) {
+  if (busy) {
+    apiRefreshBtn.dataset.busy = "true";
+    apiRefreshBtn.disabled = true;
+  } else {
+    delete apiRefreshBtn.dataset.busy;
+    apiRefreshBtn.disabled = !getApiKey();
+  }
 }
 
 function startPolling() {
@@ -467,7 +451,9 @@ function stopModeWatcher() {
 
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize
-  loadApiKey();
+  apiRefreshBtn.innerHTML = `${refreshIcon}<span>Update</span>`;
+  keyBtn.innerHTML = keyIcon;
+  updateKeyStatus();
 
   if (getApiKey()) {
     arrivalsListEl.innerHTML = "<p>Loading live arrivals...</p>";
@@ -498,57 +484,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Direct API fetch button
   apiRefreshBtn.addEventListener("click", async () => {
-    apiRefreshBtn.disabled = true;
-    apiRefreshBtn.textContent = "Updating...";
+    setRefreshBusy(true);
 
     const data = await fetchDirectFromApi();
     if (data) updateUI(data);
 
-    apiRefreshBtn.disabled = false;
-    apiRefreshBtn.textContent = "Update";
+    setRefreshBusy(false);
   });
 
-  // Save API key button
-  saveApiKeyBtn.addEventListener("click", () => {
+  // API key dialog
+  keyBtn.addEventListener("click", () => {
+    apiKeyInput.value = getApiKey() || "";
+    removeApiKeyBtn.hidden = !getApiKey();
+    keyDialog.showModal();
+  });
+
+  keyDialog.addEventListener("close", () => {
     const apiKey = apiKeyInput.value.trim();
-    if (apiKey) {
-      localStorage.setItem(API_KEY_STORAGE, apiKey);
-      apiKeyStatus.textContent = "API key saved";
-      apiKeyStatus.style.color = "#A3BE8C";
-      apiRefreshBtn.disabled = false;
 
-      // Hide input and save button, show remove button
-      apiKeyInput.hidden = true;
-      saveApiKeyBtn.hidden = true;
-      removeApiKeyBtn.hidden = false;
-
-      startPolling();
-    } else {
-      apiKeyStatus.textContent = "Please enter a valid API key";
-      apiKeyStatus.style.color = "#BF616A";
-      apiRefreshBtn.disabled = true;
+    if (keyDialog.returnValue === "save") {
+      if (apiKey) {
+        localStorage.setItem(API_KEY_STORAGE, apiKey);
+        updateKeyStatus("API key saved");
+        startPolling();
+        fetchDirectFromApi().then((data) => {
+          if (data) updateUI(data);
+        });
+      } else {
+        updateKeyStatus("Please enter a valid API key");
+      }
+      return;
     }
-  });
 
-  // Remove API key button
-  removeApiKeyBtn.addEventListener("click", () => {
-    localStorage.removeItem(API_KEY_STORAGE);
-    localStorage.removeItem(API_DATA_STORAGE);
-    localStorage.removeItem(API_DATA_TIMESTAMP);
-    apiKeyInput.value = "";
-    apiKeyStatus.textContent = "API key removed";
-    apiKeyStatus.style.color = "#EBCB8B";
-    apiRefreshBtn.disabled = true;
+    if (keyDialog.returnValue === "remove") {
+      localStorage.removeItem(API_KEY_STORAGE);
+      localStorage.removeItem(API_DATA_STORAGE);
+      localStorage.removeItem(API_DATA_TIMESTAMP);
+      apiKeyInput.value = "";
+      updateKeyStatus("API key removed");
+      stopPolling();
 
-    // Show input and save button, hide remove button
-    apiKeyInput.hidden = false;
-    saveApiKeyBtn.hidden = false;
-    removeApiKeyBtn.hidden = true;
-
-    stopPolling();
-
-    // Reload data from cache since we cleared localStorage
-    fetchCachedArrivals().then(updateUI);
+      // Reload data from cache since we cleared localStorage
+      fetchCachedArrivals().then(updateUI);
+    }
   });
 });
 

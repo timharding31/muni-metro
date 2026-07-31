@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2E3440" />
     <title>SF Muni - N or J</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico" />
     <link
@@ -28,36 +34,66 @@
   </head>
 
   <body>
-    <main>
-      <div class="image">
-        <img src="./images/apple-touch-icon.png" alt="SF Muni - N or J" />
-      </div>
+    <div class="app">
+      <header class="mark">
+        <img src="./images/apple-touch-icon.png" alt="N or J" />
+      </header>
 
-      <section id="trains">
-        <h2>Upcoming Buses</h2>
-        <ul id="arrivals-list">
-          Loading arrivals...
-        </ul>
-      </section>
+      <ul class="board" id="arrivals-list" aria-live="polite">
+        Loading arrivals...
+      </ul>
 
-      <section id="controls">
-        <div id="last-updated">Last Updated: Never</div>
-        <button id="api-refresh-btn">Update</button>
-      </section>
+      <footer class="controls">
+        <div class="stamp">
+          <span class="status-dot" id="api-key-status"></span>
+          <span id="last-updated">Never updated</span>
+        </div>
+        <button class="update" id="api-refresh-btn">Update</button>
+        <button class="keybtn" id="key-btn" aria-label="API key settings">
+          Key
+        </button>
+      </footer>
+    </div>
 
-      <section id="api-key">
+    <dialog class="key-dialog" id="key-dialog">
+      <form method="dialog" class="key-dialog__body">
+        <h2>511.org API key</h2>
+        <p class="key-dialog__hint">
+          Stored on this device only. Without a key the app falls back to the
+          cached data published by GitHub Actions.
+        </p>
         <input
           type="password"
+          class="key-dialog__input"
           id="api-key-input"
-          placeholder="Enter your 511.org API Key"
+          placeholder="Paste your API key"
+          autocomplete="off"
         />
-        <button id="save-api-key">Save API Key</button>
-        <div class="status-container">
-          <div id="api-key-status"></div>
-          <button id="remove-api-key" hidden>Remove API Key</button>
+        <div class="key-dialog__actions">
+          <button
+            value="cancel"
+            class="key-dialog__btn key-dialog__btn--ghost"
+            formnovalidate
+          >
+            Cancel
+          </button>
+          <button
+            value="remove"
+            class="key-dialog__btn key-dialog__btn--danger"
+            id="remove-api-key"
+          >
+            Remove
+          </button>
+          <button
+            value="save"
+            class="key-dialog__btn key-dialog__btn--primary"
+            id="save-api-key"
+          >
+            Save
+          </button>
         </div>
-      </section>
-    </main>
+      </form>
+    </dialog>
 
     <script src="./js/app.js"></script>
   </body>
