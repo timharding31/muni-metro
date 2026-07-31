@@ -4,7 +4,7 @@
   "description": "SF Muni bus arrival monitor",
   "private": true,
   "scripts": {
-    "dev": "npx http-server ./public",
+    "dev": "npx http-server ./public -c-1",
     "test": "echo \"No tests specified\""
   },
   "keywords": [
