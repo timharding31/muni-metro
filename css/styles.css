@@ -38,17 +38,27 @@ body {
     var(--nord0);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+  /* The board is the only thing that scrolls. The page itself never should —
+     when it does, the controls slide out from under the thumb. */
+  overflow: hidden;
 }
 
 /* icon / list / controls — controls stay in thumb reach */
 .app {
+  /* svh, not dvh: dvh tracks a viewport that can grow (a retracting browser
+     toolbar), which lets the layout size itself taller than what is on screen
+     right now. svh is the smallest the viewport ever gets, so the controls fit
+     in every state. The insets keep them clear of the Android gesture bar. */
   height: 100vh;
-  height: 100dvh;
+  height: 100svh;
   display: grid;
   grid-template-rows: auto 1fr auto;
   max-width: 560px;
   margin: 0 auto;
-  padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+  padding: calc(14px + env(safe-area-inset-top))
+    calc(18px + env(safe-area-inset-right))
+    calc(18px + env(safe-area-inset-bottom))
+    calc(18px + env(safe-area-inset-left));
 }
 
 .mark {
