@@ -34,8 +34,10 @@ body {
   font-family: var(--sans);
   margin: 0;
   color: var(--nord6);
-  background: linear-gradient(180deg, #353d4c 0%, var(--nord0) 30%),
-    var(--nord0);
+  /* The first stop must be exactly the theme-color, or the seam between the
+     Android status bar and the page is visible. The gradient falls off below
+     it rather than lifting above it. */
+  background: linear-gradient(180deg, var(--nord0) 0%, #272b34 30%), #272b34;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
   /* The board is the only thing that scrolls. The page itself never should —
