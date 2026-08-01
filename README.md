@@ -90,9 +90,15 @@ To change this schedule:
 
 ### Adding More Stops
 
+Stop knowledge lives in one place, `public/js/arrivals.js`:
+
 1. Update the list of stop codes in `.github/workflows/update-cache.yml`
-2. Add the stop to the `STOPS` config in `public/js/app.js` (line, direction, and name)
-3. Add the stop to the `INBOUND_STOPS` or `OUTBOUND_STOPS` array so it renders in the right mode
+2. Add the stop to the `STOPS` config in `public/js/arrivals.js` (code, name, lines,
+   direction, and line colors)
+3. Add it to the `INBOUND_STOPS` or `OUTBOUND_STOPS` array so it renders in the right mode
+
+Nothing else needs to change — the feed derives which stops to fetch from `STOPS`,
+and the view renders whatever groups it is given.
 
 ## Project Structure
 
@@ -102,11 +108,35 @@ muni-metro/
 │   ├── deploy.yml              # Workflow to deploy the site
 │   └── update-cache.yml        # Workflow to update the transit data
 ├── public/                     # Static website files
-│   ├── css/                    # CSS stylesheets
-│   ├── js/                     # JavaScript files
+│   ├── css/styles.css          # All styling
+│   ├── js/
+│   │   ├── app.js              # Entry point — wires the three modules together
+│   │   ├── arrivals.js         # Stop config + SIRI parsing -> the board to show
+│   │   ├── feed.js             # Live API / localStorage / published cache, polling
+│   │   └── board.js            # All DOM rendering and controls
 │   └── index.html              # Main HTML file
 └── README.md                   # This documentation
 ```
+
+### Module Boundaries
+
+The three modules are deliberately deep — small interfaces over the parts most
+likely to change:
+
+- **`arrivals.js`** — the only module that knows stop codes, direction refs, line
+  filters, the SIRI response shape, and the AM/PM commute split. Its whole
+  interface is `buildBoard(snapshot)`, which returns exactly what the screen
+  shows. It touches no DOM and performs no I/O, so it is directly testable.
+- **`feed.js`** — the only module that fetches. It hides the three data sources
+  (live 511.org, the last live response in `localStorage`, the static cache
+  published by Actions) behind one fallback chain, and owns the API key, the poll
+  timer, the per-minute heartbeat that keeps countdowns current, and suspending
+  itself while the tab is hidden.
+- **`board.js`** — the only module that touches the DOM. It owns every element
+  id, all markup, the icons, the busy/status affordances, and the key dialog. It
+  cannot fetch or read the clock.
+
+`app.js` is wiring and nothing else.
 
 ## License
 

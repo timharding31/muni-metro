@@ -12,3 +12,5 @@ yarn-error.log*
 
 # misc
 .DS_Store
+# transit data cache — generated on the gh-pages branch by Actions
+/public/data
