@@ -6,14 +6,14 @@
 // fetch, poll, or read the clock.
 
 const refreshIcon = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
     <path d="M21 3v6h-6"/>
   </svg>
 `.trim();
 
 const keyIcon = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="m15.5 7.5 3 3L22 7l-3-3"/>
     <path d="m21 2-9.6 9.6"/>
     <circle cx="7.5" cy="15.5" r="5.5"/>
@@ -55,7 +55,17 @@ function groupHTML(group, destination) {
       <div class="group__head">
         <h2 class="stop-name">${group.stopName}</h2>
         <span class="track" aria-hidden="true">
-          <span class="track__dot"></span>
+          <span class="track__dot">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 6v6"/>
+              <path d="M15 6v6"/>
+              <path d="M2 12h19.6"/>
+              <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+              <circle cx="7" cy="18" r="2"/>
+              <path d="M9 18h5"/>
+              <circle cx="16" cy="18" r="2"/>
+            </svg>
+          </span>
           <span class="track__line"></span>
           <span class="track__head"></span>
         </span>

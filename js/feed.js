@@ -13,6 +13,11 @@ const API_DATA_STORAGE = "muni-metro-data";
 const API_DATA_TIMESTAMP = "muni-metro-data-timestamp";
 
 const POLL_INTERVAL_MS = 30_000;
+// A dev server left open all afternoon would spend the day's request quota on a
+// board nobody is reading, so local dev loads once and then sits still.
+const IS_LOCAL_DEV = ["localhost", "127.0.0.1", "[::1]"].includes(
+  location.hostname,
+);
 // Countdowns are minute-resolution, so re-emitting this often is enough to keep
 // them accurate — and it is what flips the board from AM to PM at noon.
 const HEARTBEAT_INTERVAL_MS = 60_000;
@@ -153,7 +158,9 @@ export function createFeed({ onSnapshot, onStatus }) {
 
   function startTimers() {
     stopTimers();
-    if (getApiKey()) {
+    // Nothing to poll for without a key, and polling from a dev server only
+    // burns quota against the real API.
+    if (getApiKey() && !IS_LOCAL_DEV) {
       pollTimer = setInterval(refresh, POLL_INTERVAL_MS);
     }
     // Re-emitting the snapshot re-renders it against the current clock, which is
