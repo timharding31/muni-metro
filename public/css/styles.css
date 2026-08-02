@@ -121,6 +121,7 @@ body {
   color: var(--nord6);
   margin: 0;
   min-width: 0;
+  line-height: 18px;
 }
 
 /* route segment: origin dot, stretching track, arrowhead, destination */
@@ -132,10 +133,13 @@ body {
 }
 
 .track__dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 2px solid var(--frost-2);
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-content: center;
+  /* border-radius: 50%; */
+  /* border: 2px solid var(--frost-2); */
+  color: var(--frost-4);
   flex: none;
 }
 
@@ -162,6 +166,7 @@ body {
   text-transform: uppercase;
   color: var(--frost-2);
   flex: none;
+  line-height: 18px;
 }
 
 /* --- rows -------------------------------------------------------------- */
@@ -246,7 +251,7 @@ body {
 .eta__num {
   font-weight: 600;
   font-size: 38px;
-  line-height: 0.92;
+  line-height: 0;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
 }
@@ -261,7 +266,7 @@ body {
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.13em;
-  color: var(--nord3);
+  color: var(--nord4);
 }
 
 /* imminent: the one place amber is allowed */
@@ -271,7 +276,7 @@ body {
 }
 
 .row[data-stale="true"] .eta__num {
-  color: var(--nord3);
+  color: var(--nord4);
 }
 
 /* --- controls ---------------------------------------------------------- */
@@ -293,7 +298,7 @@ body {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--nord3);
+  color: var(--nor4);
 }
 
 .status-dot {
@@ -316,7 +321,7 @@ body {
 .update {
   font-family: var(--sans);
   font-size: 19px;
-  font-weight: 600;
+  font-weight: bold;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--nord0);
