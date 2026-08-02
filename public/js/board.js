@@ -6,17 +6,16 @@
 // fetch, poll, or read the clock.
 
 const refreshIcon = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
-    <path d="M21 3v6h-6"/>
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+    <path d="M21 3v5h-5"/>
   </svg>
 `.trim();
 
 const keyIcon = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="m15.5 7.5 3 3L22 7l-3-3"/>
-    <path d="m21 2-9.6 9.6"/>
-    <circle cx="7.5" cy="15.5" r="5.5"/>
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/>
+    <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>
   </svg>
 `.trim();
 
@@ -168,6 +167,9 @@ export function createBoard({ getApiKey, onRefresh, onKeyChange }) {
 
       arrivalsListEl.innerHTML = board.groups.length
         ? board.groups
+            .slice()
+            // Reverse alphabetical by stop name.
+            .sort((a, b) => b.stopName.localeCompare(a.stopName))
             .map((group) => groupHTML(group, board.destination))
             .join("")
         : `<p>${board.emptyMessage}</p>`;
