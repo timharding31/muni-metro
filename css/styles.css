@@ -251,7 +251,7 @@ body {
 .eta__num {
   font-weight: 600;
   font-size: 38px;
-  line-height: 0;
+  line-height: 40px;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
 }
